@@ -9,7 +9,7 @@ function Merchandise() {
     // Fetch product data based on the category ID
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/merchandise/${id}`);
+        const response = await fetch(`http://localhost:8000/merchandise/${id}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

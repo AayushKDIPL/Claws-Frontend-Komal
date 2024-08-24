@@ -1,4 +1,4 @@
-/* @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+ @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
 
 * {
     margin: 0;
@@ -11,29 +11,33 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
+    min-height: 1080px;
     background: url("../img/IMG_6.JPG") no-repeat center center fixed;
     background-size: cover;
-    padding: 50px 15px; */
+    padding: 50px 15px; 
+    /* background-color: yellow !important; */
     /* margin-bottom: 10rem !important; */
-/* }
+ }
 
-.container {
+.container1 {
     display: flex;
     justify-content: space-between;
     gap: 20px;
     width: 100%;
     max-width: 1200px;
+    /* background-color: green; */
 }
 
 .form-box {
+    /* background-color: red; */
     width: 100%;
-    max-width: 600px;
+    max-width: 400px;
     background-color: #b39ccdc4;
     border: 2px solid #cccffc;
     border-radius: 20px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   
 }
 
 h2, h3 {
@@ -45,6 +49,24 @@ h2, h3 {
 .inputbox {
     position: relative;
     margin: 15px 0;
+}
+.address{ 
+    margin: 1rem !important;
+    padding: 1rem !important;
+    border-radius: 1rem;
+    width: 26rem !important;
+    /* margin-left: -2rem !important; */
+}
+
+.address label{
+    margin: 0.25rem;
+    padding-right: 2rem !important;
+}
+.address input{
+    margin: 0.25rem;
+    padding-right: 10rem !important;
+    border-radius: 5px;
+   
 }
 
 .inputbox input {
@@ -124,19 +146,35 @@ button {
 }
 .bill-box{
     height: 100%;
-} */
-
-/* Responsive design */
-/* @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        gap: 10px;
+} 
+ 
+ 
+@media (max-width:426px ){
+    .address{ 
+         margin: 0 !important;
+        border-radius: 1rem;
+        width: 100% !important;
+        /* margin-left: -2rem !important; */
+    }
+}
+@media (max-width:405px ){
+    .address{ 
+        margin-left: 1rem !important;
+        border-radius: 1rem;
+        width: 20rem !important;
+        /* margin-left: -2rem !important; */
     }
 
-    .form-box {
-        width: 100%;
+    .address input{
+        margin: 0.25rem;
+        padding-right: 10rem !important;
+        border-radius: 5px;
+        width: 15rem !important;
+       
     }
 
-     
-} */
+    .pay-box{
+        width: 18rem !important;
+    }
+}
 

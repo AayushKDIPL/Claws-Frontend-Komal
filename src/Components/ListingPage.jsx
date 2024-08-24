@@ -5,7 +5,7 @@ const ListingPage = () => {
     const [listings, setListings] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/listings')
+        fetch('http://localhost:8000/api/listings')
             .then(response => response.json())
             .then(data => setListings(data))
             .catch(error => console.error('Error fetching data:', error));

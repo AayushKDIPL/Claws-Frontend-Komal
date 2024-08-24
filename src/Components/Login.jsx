@@ -1,37 +1,77 @@
-import React, { useState } from 'react'; 
-import "../style/Log.css"
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+import React, { useState } from 'react';
+import "../style/Log.css";
+import { useNavigate } from 'react-router-dom';
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle your form submission here
-    console.log('Form submitted:', { username, password, rememberMe });
+const Login = () => {
+  // State for email and password
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me"
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+
+  const jump=useNavigate();
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Create the login data object
+    const loginData = {
+      email,
+      password,
+      rememberMe
+    };
+
+    try {
+      // Make a POST request to your login API endpoint
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      });
+
+      // Parse the response
+      const result = await response.json();
+
+      if (response.ok) {
+        // Handle successful login, e.g., redirect to another page
+        localStorage.setItem('accessToken', result.message.accesstoken);
+        alert('Login successful:', result);
+        jump("/");
+        // Redirect or store user token as needed
+      } else {
+        // Handle login error
+        setErrorMessage(result.message || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setErrorMessage('An error occurred. Please try again.');
+    }
   };
 
   return (
     <section>
       <div className="form-box">
-        <div className="from-value">
+        <div className="form-value">
           <form className='in-box' onSubmit={handleSubmit}>
             <h2>Login</h2>
             <div className="inputbox">
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} // Update email state
                 required
               />
-              <label>UserName</label>
+              <label>Email</label>
             </div>
             <div className="inputbox">
               <ion-icon name="lock-closed-outline"></ion-icon>
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)} // Update password state
                 required
               />
               <label>Password</label>
@@ -41,16 +81,17 @@ function Login() {
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(e) => setRememberMe(e.target.checked)} // Update rememberMe state
                 />
                 Remember Me
-                <a href="a">Forget Password</a>
+                <a href="#">Forgot Password</a>
               </label>
             </div>
             <button type="submit">Log in</button>
+            {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error messages */}
             <div className="register">
               <p>
-                Don't have a Account <a href="a">Register</a>
+                Don't have an account? <a href="/signup">Register</a>
               </p>
             </div>
           </form>
@@ -58,6 +99,6 @@ function Login() {
       </div>
     </section>
   );
-}
+};
 
 export default Login;

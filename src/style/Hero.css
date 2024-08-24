@@ -128,10 +128,13 @@
 }
  
 .heading1{
+    display: flex;
+    justify-content: start;
     font-weight: 600;
     font-size: 20px;
     /* margin-left: 1.5rem; */
     margin-bottom: 1.25rem;
+    /* margin-right: 25rem; */
 }
 .heading2{
     font-weight: 600;
@@ -139,9 +142,10 @@
     margin-top: 1rem;
     /* margin-left: -26rem !important; */
     margin-bottom: 1.5rem;
+    
 }
 .btn_div {
-    margin-left: 1rem;
+    margin-left: -10rem;
 }
 
 .btn_div  button{

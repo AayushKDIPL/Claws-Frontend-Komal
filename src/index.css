@@ -138,12 +138,12 @@ body {
   
   /* animations */
 
-  .card {
+  .product-card {
     transition: all 0.3s ease-in-out; /* add transition effect to card */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* add subtle shadow to card */
   }
   
-  .card:hover {
+  .product-card:hover {
     transform: translateY(-5px); /* lift card on hover */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* increase shadow on hover */
   }

@@ -31,6 +31,10 @@
     color: black !important;
 }
 
+/* .b2 button{
+    color: white !important;
+    text-decoration: none !important;
+} */
 /* .cart_img{
     height: 50px;
     margin: 0.5rem;
@@ -173,6 +177,24 @@
         width: 100%;
     }
 }
+.btn-center {
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .btn-pay {
+    /* display: flex; */
+    justify-content: center;
+    width: 10rem; /* Default width for larger screens */
+  }
+  
+  /* Responsive design for smaller screens */
+  @media (max-width: 576px) {
+    .btn-pay {
+      width: 10rem; /* Width for small devices */
+    }
+  }
  
 
 /* Additional media query for very small screens (e.g., 375px) */

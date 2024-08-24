@@ -1,66 +1,112 @@
-import React, { useState } from 'react'; 
-import "../style/Log.css"
-function Signup() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+import React, { useState } from 'react';
+import "../style/Log.css";
+import { useNavigate } from 'react-router-dom';
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle your form submission here
-    console.log('Form submitted:', { username, password, rememberMe });
+function Signup() {
+  // State for name, password, email, and rememberMe
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [successMessage, setSuccessMessage] = useState(''); // State for success messages
+
+  const jump=useNavigate();
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Create the signup data object
+    const signupData = {
+      name,
+      password,
+      email,
+      rememberMe
+    };
+
+    try {
+      // Make a POST request to your signup API endpoint
+      const response = await fetch('http://localhost:8000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(signupData)
+      });
+
+      // Parse the response
+      const result = await response.json();
+
+      if (response.ok) {
+        // Handle successful signup
+        alert('Signup successful:', result);
+        setSuccessMessage('Signup successful! Please log in.'); // Display success message
+        setName('');
+        setPassword('');
+        setEmail('');
+        setRememberMe(false);
+        jump("/login");
+      } else {
+        // Handle signup error
+        setErrorMessage(result.message || 'Signup failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+      setErrorMessage('An error occurred. Please try again.');
+    }
   };
 
   return (
     <section>
       <div className="form-box">
-        <div className="from-value">
+        <div className="form-value">
           <form onSubmit={handleSubmit}>
             <h2 className='mt-3'>Signup</h2>
             <div className="inputbox">
               <input
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)} // Update name state
                 required
               />
-              <label>UserName</label>
+              <label>Name</label> {/* Updated label to "Name" */}
             </div>
             <div className="inputbox">
-              <ion-icon name="lock-closed-outline"></ion-icon>
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <label>Email</label>
-            </div>
-            <div className="inputbox">
-              <ion-icon name="lock-closed-outline"></ion-icon>
-              <input
-                type="email"
-                // value={password}
-                // onChange={(e) => setEmail()}
+                onChange={(e) => setPassword(e.target.value)} // Update password state
                 required
               />
               <label>Password</label>
+            </div>
+            <div className="inputbox">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} // Update email state
+                required
+              />
+              <label>Email</label>
             </div>
             <div className="forget">
               <label>
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(e) => setRememberMe(e.target.checked)} // Update rememberMe state
                 />
                 Remember Me
-                <a href="a">Forget Password</a>
+                <a href="#">Forget Password</a>
               </label>
             </div>
-            <button type="submit">Sign up</button>
+            <button type="submit">Sign up</button> {/* Submit button */}
+            {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error messages */}
+            {successMessage && <p className="success-message">{successMessage}</p>} {/* Display success messages */}
             <div className="register">
               <p>
-                Already have a Account <a href="a">Register</a>
+                Already have an account? <a href="/login">Login</a>
               </p>
             </div>
           </form>

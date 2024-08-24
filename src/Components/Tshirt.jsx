@@ -1,63 +1,51 @@
 import React, { useState,useEffect } from 'react';
 import tshirt from "../img/product-1.JPG";
-import "../style/Tshirt.css"; // Import your CSS file for additional styling
+import "../style/Tshirt.css";  
 // import products from "./products";
 export default function Tshirt() {
   // Define an array of product details
-  const products = [
-    {
-      title: 'Drip Streets/Off White',
-      price: 799.00,
-      originalPrice: 1499.00,
-      description: 'Shipping and taxes included.',
-      image: tshirt,
-    },
-    {
-      title: 'Drip Stree',
-      price: 799.00,
-      originalPrice: 199.00,
-      description: 'Shipping and taxes included.',
-      image: tshirt,
-    },
-    {
-      title: 'D/Off White',
-      price: 79.00,
-      originalPrice: 1499.00,
-      description: 'Shipping and taxes included.',
-      image: tshirt,
-    },
-    {
-      title: 'Drip Strehite',
-      price: 799.00,
-      originalPrice: 1499.00,
-      description: 'Shipping and taxes included.',
-      image: tshirt,
-    },
-  ];
+
+  const [productData, setProductData] = useState([]); // Initialize as an empty array
+  console.log(productData);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/product', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (Array.isArray(data.message)) {
+          setProductData(data.message);
+        } else {
+          console.error('Expected an array but got:', data.message);
+          setProductData([]);
+        }
+      } catch (e) {
+        console.log('Failed to fetch products:', e);
+        setProductData([]);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleAddToCart = (product) => {
-    // Retrieve the existing cart data from localStorage
     const cartData = localStorage.getItem('cartData');
     let cart = cartData ? JSON.parse(cartData) : [];
-
-    // Check if the product already exists in the cart
     const existingProductIndex = cart.findIndex(item => item.title === product.title);
 
     if (existingProductIndex !== -1) {
-      // If the product exists, increment the quantity
       cart[existingProductIndex].quantity = (cart[existingProductIndex].quantity || 1) + 1;
     } else {
-      // If the product does not exist, add it to the cart with quantity 1
       cart.push({ ...product, quantity: 1 });
     }
 
-    // Save the updated cart data to localStorage
     localStorage.setItem('cartData', JSON.stringify(cart));
-
-    // Provide feedback to the user
     alert('Product added to cart!');
   };
-
+ 
    //Products
 
    const[product, setProduct] = useState([]);
@@ -83,41 +71,52 @@ export default function Tshirt() {
    }, []);
 
   return (
-    <div className="tshirt-container">
-      <div className="card-container">
-        {products.map((product, index) => (
-          <div className="card" key={index}>
-            <img src={product.image} className="card-img" alt={product.title} />
-            <p className="card-title">{product.title}</p>
-            <p>Price: ₹{product.price} &nbsp; Offer: {product.originalPrice - product.price > 0 ? `${Math.round((1 - product.price / product.originalPrice) * 100)}% off` : 'No Offer'}</p>
-            <p className="card-info">{product.description}</p>
-            <button type="button" onClick={() => handleAddToCart(product)} className="btn btn-dark w-50">
-              Add to Cart
-            </button>
-          </div>
-        ))}
-        <hr/>
-              {product.map((item) => (
-                <div className="col-md-4" key={item._id}>
-                   <div className="row ms-2">
-                        <div className="card  ">
-                          <img src={item.img} className="card-img-top imgdata" alt="..." />
-                          <div className="card-body">
-                            <h5 className="card-title">{item.title}</h5>
-                            <p>Price: ₹{item.price} &nbsp; Offer: {item.offer}%off</p>
-                            <p></p>
-                            <p className="discription">
-                              {item.description}
-                            </p>
-                            <button onClick={() => handleAddToCart(item)} className="btn btn-dark w-100">
-                              Add to Cart
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                </div>
+    <div className="product-page mt-5">
+      <center>
+        <h1 className="product-title mt-5">All Products</h1>
+      </center>
+      <div className="product-grid">
+        {productData.length > 0 ? (
+          productData.map((product) => (
+            <div key={product._id} className="product-card ">
 
-                ))}
+              {/* images */}
+              <div className="product-images">
+                {product.images.length > 0 ? (
+                  product.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={`http://localhost:8000/${image}`}
+                      className="product-img   imgdata"
+                      alt={`Product image ${index + 1}`}
+                    />
+                  ))
+                ) : (
+                  <p>No images available</p>
+                )}
+              </div>
+
+              <div className="product-body card-body">
+
+                <h5 className="product-name card-title">{product.name}</h5>
+
+                <p className="product-price">
+                  Price: ₹{product.price} &nbsp; Offer: {product.offer}% off
+                </p>
+
+                <p className="product-description description">{product.description}</p>
+ 
+                <button onClick={() => handleAddToCart(product)} className="btn btn-dark w-100">
+                    Add to Cart
+                </button>
+
+
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No products available</p>
+        )}
       </div>
     </div>
   );

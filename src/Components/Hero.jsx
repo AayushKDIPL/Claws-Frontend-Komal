@@ -7,10 +7,10 @@ function Hero() {
   return (
     <div className="hero_image">
       {/* <div data-aos="zoom-in-up"> */}
-      <div className="heading_div container">
+      <div className="heading_div ">
         <div data-aos="fade-down">
           <div className="home-div">
-            <h3 className="text-white heading1">
+            <h3 className="text-white heading1 ms-5 ">
               CONNECT WITH THE INDIA COMMUNITY OF ARM WRESTLERS <br /><br />
               30,000 MEMBERS AND COUNTING
             </h3>

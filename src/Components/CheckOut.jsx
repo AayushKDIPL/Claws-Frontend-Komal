@@ -1,151 +1,305 @@
-import React from "react";
+import React, { useState } from "react";
 import "../style/CheckOut.css";
+import axios from "axios";  // Correct import for axios
 
 const CheckOut = () => {
-  return (
-    <section className="checkout-section">
-      <div className="container  ">
-        {/* Billing Details Form */}
-        <div className="form-box bill-box">
-          <div className="form-content">
-            <h3>Billing Details</h3>
-            <form method="post">
-              <div className="form-row">
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="fname"
-                    placeholder="Full name *"
-                    required
-                  />
-                  <label>Full name</label>
-                </div>
-                {/* <div className="inputbox">
-                    <input type="text" name="lname" placeholder="Last name *" required />
-                    <label>Last name</label>
-                </div> */}
-              </div>
-              <div className="form-row">
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="billing_address"
-                    placeholder="Address *"
-                    required
-                  />
-                  <label>Address</label>
-                </div>
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="billing_address2"
-                    placeholder="Address line2"
-                  />
-                  <label> </label>
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="City / Town *"
-                    required
-                  />
-                  <label>City / Town</label>
-                </div>
-                {/* <div className="inputbox">
-                    <input type="text" name="state" placeholder="State / County *" required />
-                    <label>State / County</label>
-                </div> */}
-              </div>
-              <div className="form-row">
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="zipcode"
-                    placeholder="Postcode / ZIP *"
-                    required
-                  />
-                  <label>Postcode / ZIP</label>
-                </div>
-                <div className="inputbox">
-                  <input
-                    type="text"
-                    name="phone"
-                    placeholder="Phone *"
-                    required
-                  />
-                  <label>Phone</label>
-                </div>
-              </div>
-              <div className="inputbox full-width">
-                <input
-                  type="text"
-                  name="email"
-                  placeholder="Email address *"
-                  required
-                />
-                <label>Email address</label>
-              </div>
-              <button type="submit">Submit</button>
-            </form>
-          </div>
-        </div>
+  const [responseId, setResponseId] = useState("");
+  const [responseState, setResponseState] = useState([]);
 
-        {/* Login Form Container */}
-        <div className="login-container">
-          <h2>Login</h2>
-          <div className="form-box">
-            <div className="form-content">
-              <div className="login-form">
-                <h3>Already have an account?</h3>
-                <a
-                  href="#loginform"
-                  data-bs-toggle="collapse"
-                  className="collapsed"
-                  aria-expanded="false"
-                >
-                  Click here to login
-                </a>
-                <div
-                  className="panel-collapse collapse login_form"
-                  id="loginform"
-                >
-                  <form method="post">
-                    <div className="inputbox">
-                      <input
-                        type="text"
-                        name="email"
-                        placeholder="Username Or Email"
-                        required
-                      />
-                      <label>Username Or Email</label>
-                    </div>
-                    <div className="inputbox">
-                      <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        required
-                      />
-                      <label>Password</label>
-                    </div>
-                    <div className="forget">
-                      <label>
-                        <input type="checkbox" name="remember" />
-                        Remember Me
-                        <a href="#">Forgot password?</a>
-                      </label>
-                    </div>
-                    <button type="submit">Log in</button>
-                  </form>
-                </div>
-              </div>
+  const loadScript = (src) => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const createRazorpayOrder = async (amount) => {
+    const data = JSON.stringify({
+      amount: amount * 100,  // Convert amount to paise
+      currency: 'INR',
+    });
+
+    const config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:8000/orders", // Adjust URL if using https
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    try {
+      const response = await axios.request(config);
+      console.log("Order created:", response.data);
+      handleRazorpayScreen(response.data.amount);
+    } catch (error) {
+      console.error("Error creating order:", error.response?.data || error.message || error);
+      alert("Error creating order. Please check the console for details.");
+    }
+  };
+
+  const handleRazorpayScreen = async (amount) => {
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+    if (!res) {
+      alert("Some error occurred while loading the Razorpay script.");
+      return;
+    }
+
+    const options = {
+      key: 'rzp_test_ZUWzmXBR3ogNsS', // Correctly configured key
+      amount: amount,
+      currency: 'INR',
+      name: "Papaya Coders",
+      description: "Payment to Papaya Coders",
+      image: "https://papayacoders.com/demo.png",
+      handler: function(response) {
+        setResponseId(response.razorpay_payment_id);
+      },
+      prefill: {
+        name: "Papaya Coders",
+        email: "papayacoders@gmail.com",
+      },
+      theme: {
+        color: "#F4C430"
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  };
+
+  const paymentFetch = (e) => {
+    e.preventDefault();
+
+    const paymentId = e.target.paymentId.value;
+
+    axios.get(`http://localhost:8000/payment/${paymentId}`) // Adjust URL if using https
+      .then((response) => {
+        console.log("Payment details:", response.data);
+        setResponseState(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching payment details:", error.response?.data || error.message || error);
+      });
+  };
+
+  const [showAddress, setShowAddress] = useState(false);
+  const [addressDetails, setAddressDetails] = useState({
+    name: '',
+    mobileNumber: '',
+    pincode: '',
+    locality: '',
+    address: '',
+    city: '',
+    state: '',
+    landmark: '',
+    alternatePhone: '',
+    addressType: '',
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setAddressDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setShowAddress(true);
+  };
+
+  const handleAddressChange = () => {
+    setShowAddress(false);
+  };
+
+  return (
+    <section className="checkout-section ">
+      <div className="container1">
+    {/* login */}
+    <div>
+      <p className="text-light">Didn't Login <a href="/login">Click here to login</a></p>
+      
+    
+      
+
+        {/* Billing Details Form */}
+        <div className='address text-white mt-2  bg-dark ' id="adrress">
+      {showAddress ? (
+        <div className="address-details">
+          <div className="address-info">
+            <p><p className=""> Delivery Address</p>
+              <b>{addressDetails.name}</b> 
+            </p>
+            <p>
+              {addressDetails.address}, {addressDetails.locality},
+              {addressDetails.city}, {addressDetails.state} -
+              {addressDetails.pincode}
+            </p>
+          </div>
+          <button onClick={handleAddressChange}>Change Address</button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="add">Delivery Address</div>
+          <div className="form-group mb-2 ">
+            <label htmlFor="name">Name:</label><br />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={addressDetails.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="mobileNumber">10-digit mobile number:</label><br />
+            <input
+              type="tel"
+              id="mobileNumber"
+              name="mobileNumber"
+              value={addressDetails.mobileNumber}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="pincode">Pincode:</label><br />
+            <input
+              type="number"
+              id="pincode"
+              name="pincode"
+              value={addressDetails.pincode}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="locality">Locality:</label><br />
+            <input
+              type="text"
+              id="locality"
+              name="locality"
+              value={addressDetails.locality}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="address">Address (Area and Street):</label><br />
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={addressDetails.address}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="city">City/District/Town:</label><br />
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={addressDetails.city}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          {/* <div className="form-group">
+            <label htmlFor="state">State:</label>
+            <select
+              id="state"
+              name="state"
+              value={addressDetails.state}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select State</option> 
+            </select>
+          </div> */}
+          <div className="form-group">
+            <label htmlFor="landmark">Landmark (Optional):</label><br />
+            <input
+              type="text"
+              id="landmark"
+              name="landmark"
+              value={addressDetails.landmark}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="alternatePhone">Alternate Phone (Optional):</label><br />
+            <input
+              type="tel"
+              id="alternatePhone"
+              name="alternatePhone"
+              value={addressDetails.alternatePhone}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="addressType">Address Type:</label><br />
+            <div>
+              <input
+                type="radio"
+                id="home"
+                name="addressType"
+                value="Home"
+                checked={addressDetails.addressType === 'Home'}
+                onChange={handleChange}
+              />
+              <label htmlFor="home">Home (All day delivery)</label><br />
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="work"
+                name="addressType"
+                value="Work"
+                checked={addressDetails.addressType === 'Work'}
+                onChange={handleChange}
+              />
+              <label htmlFor="work">
+                Work (Delivery between 10 AM - 5 PM)
+              </label><br />
             </div>
           </div>
-        </div>
+          <button type="submit">Save and Deliver Here</button>
+        </form>
+        
+      )} 
       </div>
+
+
+      <div className="pay-box ms-3 bg-dak">
+      <button onClick={() => createRazorpayOrder(100)}>Payment of 100Rs.</button>
+          {responseId && <p>{responseId}</p>}
+          <h5>This is payment verification form</h5>
+          <form onSubmit={paymentFetch}>
+            <input type="text" name="paymentId" className="w-100" />
+            <button type="submit">Fetch Payment</button>
+            {responseState.length !== 0 && (
+              <ul>
+                <li>Amount: {responseState.amount / 100} Rs.</li>
+                <li>Currency: {responseState.currency}</li>
+                <li>Status: {responseState.status}</li>
+                <li>Method: {responseState.method}</li>
+              </ul>
+            )}
+          </form>
+      </div>
+    </div>
+    </div>
+     
     </section>
   );
 };

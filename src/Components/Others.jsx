@@ -1,121 +1,95 @@
-import React, { useState,useEffect } from "react";
-import tshirt from "../img/product-1.JPG";
-import Categories from "./Categories";
-import cable from "../img/cable.jpg";
-import Claws_Arm_Wrestling_Table from "../img/Claws_Arm_Wrestling_Table.png";
-import table from "../img/table.jpg";
-import '../index.css';
+import React, { useState, useEffect } from "react";
+import '../index.css'; // Ensure this file contains your global styles
 import Cart from './Cart'; // Import the Cart component
 
 export default function Others() {
-  const [data, setData] = useState(Categories);
   const [cart, setCart] = useState([]); // Initialize the cart state
+  const [productData, setProductData] = useState([]); // Initialize as an empty array
+  console.log(productData);
 
-  const handleAddToCart = (Categories) => {
-    // Retrieve the existing cart data from localStorage
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/product', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (Array.isArray(data.message)) {
+          setProductData(data.message);
+        } else {
+          console.error('Expected an array but got:', data.message);
+          setProductData([]);
+        }
+      } catch (e) {
+        console.log('Failed to fetch products:', e);
+        setProductData([]);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = (product) => {
     const cartData = localStorage.getItem('cartData');
     let cart = cartData ? JSON.parse(cartData) : [];
-
-    // Check if the product already exists in the cart
-    const existingProductIndex = cart.findIndex(item => item.title === Categories.title);
+    const existingProductIndex = cart.findIndex(item => item.title === product.title);
 
     if (existingProductIndex !== -1) {
-      // If the product exists, increment the quantity
       cart[existingProductIndex].quantity = (cart[existingProductIndex].quantity || 1) + 1;
     } else {
-      // If the product does not exist, add it to the cart with quantity 1
-      cart.push({ ...Categories, quantity: 1 });
+      cart.push({ ...product, quantity: 1 });
     }
 
-    // Save the updated cart data to localStorage
     localStorage.setItem('cartData', JSON.stringify(cart));
-
-    // Provide feedback to the user
     alert('Product added to cart!');
   };
 
-  //Products
-
-  const[product, setProduct] = useState([]);
-  const getProduct = async () => {
-    try {
-      const response = await fetch("http://localhost:3200/equipment/products", {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': localStorage.getItem('token'), // Ensure you handle the token properly
-        },
-      });
-      const json = await response.json();
-      console.log(json);
-      setProduct(json);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  useEffect(() => {
-    getProduct();
-  }, []);
-
   return (
-    <div className="tshirt-container ms-n4  mb-5 mt-5 me-4">
-      <h1 className="text-center  text-dark">ALL EQUIPMENT</h1>
-      <div className="container-fluid mx-2">
-        <div className="row mt-1 ">
-          <div className="col-md-12">
-            <div className="row">
-              {data.map((values) => {
-                const { id, title, price, image, offer, discription } = values;
-                return (
-                  <>
-                    <div className="col-md-4" key={id}>
-                      <div className="row">
-                        <div className="card">
-                          <img src={values.image} className="card-img-top imgdata" alt="..." />
-                          <div className="card-body">
-                            <h5 className="card-title">{values.title}</h5>
-                            <p>Price: ₹{values.price} &nbsp; Offer: {values.offer}%off</p>
-                            <p></p>
-                            <p className="discription">
-                              {values.discription}
-                            </p>
-                            <button onClick={() => handleAddToCart(values)} className="btn btn-dark w-50">
-                              Add to Cart
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                );
-              })}
-              <br/>
-             
-              {product.map((item) => (
-                <div className="col-md-4" key={item._id}>
-                   <div className="row">
-                        <div className="card">
-                          <img src={item.img} className="card-img-top imgdata" alt="..." />
-                          <div className="card-body">
-                            <h5 className="card-title">{item.title}</h5>
-                            <p>Price: ₹{item.price} &nbsp; Offer: {item.offer}%off</p>
-                            <p></p>
-                            <p className="discription">
-                              {item.description}
-                            </p>
-                            <button onClick={() => handleAddToCart(item)} className="btn btn-dark w-100">
-                              Add to Cart
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                </div>
+    <div className="equipment-page mt-5">
+      <h4>Others</h4>
+      <div className="product-grid mt-5">
+        {productData.length > 0 ? (
+          productData.map((product) => (
+            <div key={product._id} className="product-card ">
 
-                ))}
+              {/* images */}
+              <div className="product-images">
+                {product.images.length > 0 ? (
+                  product.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={`http://localhost:8000/${image}`}
+                      className="product-img   imgdata"
+                      alt={`Product image ${index + 1}`}
+                    />
+                  ))
+                ) : (
+                  <p>No images available</p>
+                )}
+              </div>
+
+              <div className="product-body card-body">
+
+                <h5 className="product-name card-title">{product.name}</h5>
+
+                <p className="product-price">
+                  Price: ₹{product.price} &nbsp; Offer: {product.offer}% off
+                </p>
+
+                <p className="product-description description">{product.description}</p>
+ 
+                <button onClick={() => handleAddToCart(product)} className="btn btn-dark w-100">
+                    Add to Cart
+                </button>
+
+
+              </div>
             </div>
-          </div>
-        </div>
+          ))
+        ) : (
+          <p>No products available</p>
+        )}
       </div>
     </div>
   );
